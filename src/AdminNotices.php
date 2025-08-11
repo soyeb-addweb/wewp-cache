@@ -51,7 +51,7 @@ class AdminNotices {
 			wp_die( - 1, 403 );
 		}
 
-		$notice = filter_var( $_POST['notice'], FILTER_SANITIZE_STRING );
+		$notice = isset( $_POST['notice'] ) ? sanitize_text_field( wp_unslash( $_POST['notice'] ) ) : '';
 
 		update_site_option( "wewp_{$notice}_notice_dismissed", true );
 	}

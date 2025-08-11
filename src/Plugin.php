@@ -3,6 +3,17 @@
 namespace WeWP;
 
 use WeWP\Cli\Commands;
+use WeWP\Optimization\HtmlOptimization;
+use WeWP\Optimization\CdnIntegration;
+use WeWP\Optimization\DbTools;
+use WeWP\Optimization\CssJsMinifier;
+use WeWP\Optimization\Combiner;
+use WeWP\PageSpeed\ResourceHints;
+use WeWP\PageSpeed\Precache;
+use WeWP\PageSpeed\GuestMode;
+use WeWP\Ecommerce\WooCommerceSupport;
+use WeWP\Advanced\Crawler;
+use WeWP\Advanced\DeveloperApi;
 
 class Plugin {
 
@@ -44,6 +55,19 @@ class Plugin {
 		$admin_bar->init();
 		$admin_notices->init();
 		$compatibility->init();
+
+		// New modules
+		( new HtmlOptimization() )->init();
+		( new CdnIntegration() )->init();
+		( new DbTools() )->init();
+		( new CssJsMinifier() )->init();
+		( new Combiner() )->init();
+		( new ResourceHints() )->init();
+		( new Precache() )->init();
+		( new GuestMode() )->init();
+		( new WooCommerceSupport() )->init();
+		( new Crawler() )->init();
+		( new DeveloperApi() )->init();
 
 		if ( getenv( 'WEWP_SITE' ) ) {
 			

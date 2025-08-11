@@ -5,6 +5,25 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if ( ! function_exists( 'wewp' ) ) {
+    /**
+     * Global accessor for the WeWP plugin instance.
+     *
+     * @return \WeWP\Plugin
+     */
+    function wewp() {
+        if ( isset( $GLOBALS['WeWP'] ) && $GLOBALS['WeWP'] instanceof \WeWP\Plugin ) {
+            return $GLOBALS['WeWP'];
+        }
+
+        if ( function_exists( 'WeWP_cache' ) ) {
+            return WeWP_cache();
+        }
+
+        return null;
+    }
+}
+
 if ( ! function_exists( 'wewp_purge_site' ) ) {
     /**
      * Purge the entire wewp page cache.

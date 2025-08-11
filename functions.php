@@ -24,6 +24,20 @@ if ( ! function_exists( 'wewp' ) ) {
     }
 }
 
+if ( ! function_exists( 'wewp_is_first_time_guest' ) ) {
+    /**
+     * Detect if this is a first-time guest visit (no auth and no wewp_guest cookie).
+     *
+     * @return bool
+     */
+    function wewp_is_first_time_guest() {
+        if ( is_user_logged_in() ) {
+            return false;
+        }
+        return empty( $_COOKIE['wewp_guest'] );
+    }
+}
+
 if ( ! function_exists( 'wewp_purge_site' ) ) {
     /**
      * Purge the entire wewp page cache.

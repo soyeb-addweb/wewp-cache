@@ -9,7 +9,7 @@
  * Text Domain:  wewp-cache
  * Requires PHP: 7.1
  * Requires WP:  4.7
-*/
+ */
 
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,6 +20,17 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
+// Fallback PSR-4 autoloader for WeWP namespace (in case Composer is unavailable)
+spl_autoload_register( function ( $class ) {
+    if ( 0 !== strpos( $class, 'WeWP\\' ) ) {
+        return;
+    }
+    $relative = substr( $class, 5 );
+    $path     = __DIR__ . '/src/' . str_replace( '\\', '/', $relative ) . '.php';
+    if ( file_exists( $path ) ) {
+        require_once $path;
+    }
+} );
 
 /**
  * The main wewp function.

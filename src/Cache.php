@@ -105,7 +105,7 @@ class Cache {
 		}
 		
 		if ( 'purge-url' === $action ) {
-			$url = $_SERVER['HTTP_REFERER'];
+			$url = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : home_url( '/' );
 			$purge = $this->purge_url($url);
 			$type  = 'url';
 		}
@@ -134,11 +134,11 @@ class Cache {
 			
 			if ($success) {
 		    	echo '<div class="notice notice-success is-dismissible">
-		            <p>' . esc_html__( ucfirst($type).' cache cleared successfully.', 'wewp-caching') . '</p>
+		            <p>' . esc_html__( ucfirst($type).' cache cleared successfully.', 'wewp') . '</p>
 		        </div>';
 			}else {
 		    	echo '<div class="notice notice-error is-dismissible">
-		            <p>' . esc_html__('Error clearing object cache. Please try again.', 'wewp-caching') . '</p>
+		            <p>' . esc_html__('Error clearing object cache. Please try again.', 'wewp') . '</p>
 		        </div>';
 		    }
 		

@@ -1,0 +1,21 @@
+{
+    "name": "wewp/wewp-plugin",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "wewp",
+            "email": "sudo@wewp.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "wewp\\": "src/"
+        },
+        "files": [
+            "functions.php"
+        ]
+    }
+}

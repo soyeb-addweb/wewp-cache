@@ -4,11 +4,12 @@ namespace WeWP\Optimization;
 
 use WP_CLI;
 use wpdb;
+use WeWP\Settings\Options;
 
 class DbTools {
     public function init() {
         add_action( 'wewp_db_cleanup', array( $this, 'cleanup' ) );
-        if ( ! wp_next_scheduled( 'wewp_db_cleanup' ) ) {
+        if ( Options::get( 'db_maintenance', true ) && ! wp_next_scheduled( 'wewp_db_cleanup' ) ) {
             wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'wewp_db_cleanup' );
         }
         if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -18,14 +19,13 @@ class DbTools {
     }
 
     public function cleanup() {
+        if ( ! Options::get( 'db_maintenance', true ) ) {
+            return;
+        }
         global $wpdb;
-        // Delete post revisions
         $wpdb->query( "DELETE p FROM {$wpdb->posts} p WHERE p.post_type = 'revision'" );
-        // Delete trashed posts
         $wpdb->query( $wpdb->prepare( "DELETE p FROM {$wpdb->posts} p WHERE p.post_status = %s", 'trash' ) );
-        // Delete spam comments
         $wpdb->query( $wpdb->prepare( "DELETE c FROM {$wpdb->comments} c WHERE c.comment_approved = %s", 'spam' ) );
-        // Delete expired transients
         $wpdb->query( "DELETE a, b FROM {$wpdb->options} a JOIN {$wpdb->options} b ON b.option_name = REPLACE(a.option_name, '_timeout', '') WHERE a.option_name LIKE '\_transient\_%\_timeout' AND a.option_value < UNIX_TIMESTAMP()" );
     }
 

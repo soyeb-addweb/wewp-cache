@@ -2,6 +2,8 @@
 
 namespace WeWP\Optimization;
 
+use WeWP\Settings\Options;
+
 class Combiner {
     public function init() {
         add_action( 'wp_enqueue_scripts', array( $this, 'maybe_combine' ), 999 );
@@ -9,12 +11,12 @@ class Combiner {
     }
 
     protected function is_enabled_css() {
-        $enabled = defined('WEWP_COMBINE_CSS') ? (bool) WEWP_COMBINE_CSS : false;
+        $enabled = (bool) Options::get( 'combine_css', false );
         return (bool) apply_filters( 'wewp_combine_css', $enabled );
     }
 
     protected function is_enabled_js() {
-        $enabled = defined('WEWP_COMBINE_JS') ? (bool) WEWP_COMBINE_JS : false;
+        $enabled = (bool) Options::get( 'combine_js', false );
         return (bool) apply_filters( 'wewp_combine_js', $enabled );
     }
 

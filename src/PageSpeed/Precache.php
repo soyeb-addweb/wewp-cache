@@ -3,11 +3,12 @@
 namespace WeWP\PageSpeed;
 
 use WP_CLI;
+use WeWP\Settings\Options;
 
 class Precache {
     public function init() {
         add_action( 'wewp_precache', array( $this, 'crawl' ) );
-        if ( ! wp_next_scheduled( 'wewp_precache' ) ) {
+        if ( Options::get( 'precache_enabled', false ) && ! wp_next_scheduled( 'wewp_precache' ) ) {
             wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', 'wewp_precache' );
         }
         if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -16,6 +17,9 @@ class Precache {
     }
 
     public function crawl() {
+        if ( ! Options::get( 'precache_enabled', false ) ) {
+            return;
+        }
         $urls = $this->get_urls_to_precache();
         foreach ( $urls as $url ) {
             wp_remote_get( $url, array( 'timeout' => 5, 'blocking' => false ) );

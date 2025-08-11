@@ -2,6 +2,8 @@
 
 namespace WeWP\Optimization;
 
+use WeWP\Settings\Options;
+
 class HtmlOptimization {
     /**
      * Whether optimization is enabled.
@@ -10,8 +12,7 @@ class HtmlOptimization {
      * @return bool
      */
     protected function is_enabled() {
-        $enabled = defined('WEWP_OPTIMIZE_HTML') ? (bool) WEWP_OPTIMIZE_HTML : false;
-        return (bool) apply_filters('wewp_optimize_html', $enabled);
+        return (bool) Options::get( 'optimize_html', false );
     }
 
     public function init() {
@@ -37,11 +38,18 @@ class HtmlOptimization {
         }
 
         $html = $this->inject_critical_css( $html );
-        $html = $this->lazyload_iframes( $html );
-        $html = $this->add_async_defer_to_scripts( $html );
-        $html = $this->minify_html( $html );
-        $this->send_http2_preload_headers( $html );
-
+        if ( Options::get( 'lazy_iframes', true ) ) {
+            $html = $this->lazyload_iframes( $html );
+        }
+        if ( Options::get( 'async_js', true ) || Options::get( 'defer_js', true ) ) {
+            $html = $this->add_async_defer_to_scripts( $html );
+        }
+        if ( Options::get( 'minify_html', true ) ) {
+            $html = $this->minify_html( $html );
+        }
+        if ( Options::get( 'http2_push', false ) ) {
+            $this->send_http2_preload_headers( $html );
+        }
         return $html;
     }
 
@@ -57,12 +65,6 @@ class HtmlOptimization {
     }
 
     protected function lazyload_iframes( $html ) {
-        $enabled = defined('WEWP_LAZY_IFRAMES') ? (bool) WEWP_LAZY_IFRAMES : true;
-        $enabled = (bool) apply_filters('wewp_lazyload_iframes', $enabled);
-        if ( ! $enabled ) {
-            return $html;
-        }
-        // Add loading="lazy" to iframes that do not have it
         $html = preg_replace( '/<iframe(?![^>]*\bloading=)[^>]*>/', '$0', $html );
         $html = preg_replace_callback( '/<iframe(.*?)>/', function($matches) {
             $tag = $matches[0];
@@ -76,8 +78,8 @@ class HtmlOptimization {
     }
 
     protected function add_async_defer_to_scripts( $html ) {
-        $async = defined('WEWP_ASYNC_JS') ? (bool) WEWP_ASYNC_JS : true;
-        $defer = defined('WEWP_DEFER_JS') ? (bool) WEWP_DEFER_JS : true;
+        $async = (bool) Options::get( 'async_js', true );
+        $defer = (bool) Options::get( 'defer_js', true );
         $exclusions = apply_filters('wewp_defer_async_exclusions', array('jquery.js', 'jquery.min.js'));
 
         if ( ! $async && ! $defer ) {
@@ -106,24 +108,14 @@ class HtmlOptimization {
     }
 
     protected function minify_html( $html ) {
-        $enabled = defined('WEWP_MINIFY_HTML') ? (bool) WEWP_MINIFY_HTML : true;
-        $enabled = (bool) apply_filters('wewp_minify_html', $enabled);
-        if ( ! $enabled ) {
-            return $html;
-        }
-        // Remove HTML comments except IE conditions and scripts templates
         $html = preg_replace('/<!--(?!\[if|<!|>)(.*?)-->/s', '', $html);
-        // Collapse whitespace between tags
         $html = preg_replace('/>\s+</', '><', $html);
-        // Trim
         $html = trim($html);
         return $html;
     }
 
     protected function send_http2_preload_headers( $html ) {
-        $enabled = defined('WEWP_HTTP2_PUSH') ? (bool) WEWP_HTTP2_PUSH : false;
-        $enabled = (bool) apply_filters('wewp_http2_push', $enabled);
-        if ( ! $enabled || headers_sent() ) {
+        if ( headers_sent() ) {
             return;
         }
         $links = array();

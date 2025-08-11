@@ -14,6 +14,8 @@ use WeWP\PageSpeed\GuestMode;
 use WeWP\Ecommerce\WooCommerceSupport;
 use WeWP\Advanced\Crawler;
 use WeWP\Advanced\DeveloperApi;
+use WeWP\Admin\SettingsPage;
+use WeWP\Settings\Options;
 
 class Plugin {
 
@@ -55,6 +57,9 @@ class Plugin {
 		$admin_bar->init();
 		$admin_notices->init();
 		$compatibility->init();
+
+		// Admin settings page
+		( new SettingsPage() )->init();
 
 		// New modules
 		( new HtmlOptimization() )->init();

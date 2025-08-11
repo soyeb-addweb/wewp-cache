@@ -2,6 +2,8 @@
 
 namespace WeWP\Optimization;
 
+use WeWP\Settings\Options;
+
 class CssJsMinifier {
     public function init() {
         add_filter( 'style_loader_tag', array( $this, 'filter_style_tag' ), 20, 4 );
@@ -19,7 +21,7 @@ class CssJsMinifier {
     }
 
     protected function maybe_minify_url( $url ) {
-        $enabled = defined('WEWP_MINIFY_ASSETS') ? (bool) WEWP_MINIFY_ASSETS : false;
+        $enabled = (bool) Options::get( 'minify_assets', false );
         $enabled = (bool) apply_filters( 'wewp_minify_assets', $enabled );
         if ( ! $enabled ) {
             return $url;

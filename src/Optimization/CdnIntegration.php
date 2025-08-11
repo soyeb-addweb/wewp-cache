@@ -2,11 +2,13 @@
 
 namespace WeWP\Optimization;
 
+use WeWP\Settings\Options;
+
 class CdnIntegration {
     protected $cdn_host;
 
     public function __construct() {
-        $this->cdn_host = defined('WEWP_CDN_HOST') ? WEWP_CDN_HOST : '';
+        $this->cdn_host = (string) Options::get( 'cdn_host', '' );
         $this->cdn_host = apply_filters('wewp_cdn_host', $this->cdn_host);
     }
 

@@ -2,6 +2,8 @@
 
 namespace WeWP\PageSpeed;
 
+use WeWP\Settings\Options;
+
 class GuestMode {
     public function init() {
         add_action( 'init', array( $this, 'maybe_set_guest_headers' ), 0 );
@@ -11,10 +13,12 @@ class GuestMode {
         if ( is_user_logged_in() ) {
             return;
         }
+        if ( ! Options::get( 'guest_mode', false ) ) {
+            return;
+        }
         if ( headers_sent() ) {
             return;
         }
-        // Encourage upstream caches before cookies are set
         header( 'Cache-Control: public, max-age=60' );
     }
 }

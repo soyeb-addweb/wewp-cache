@@ -3,11 +3,12 @@
 namespace WeWP\Advanced;
 
 use WP_CLI;
+use WeWP\Settings\Options;
 
 class Crawler {
     public function init() {
         add_action( 'wewp_crawler_run', array( $this, 'run' ) );
-        if ( ! wp_next_scheduled( 'wewp_crawler_run' ) ) {
+        if ( Options::get( 'crawler_enabled', false ) && ! wp_next_scheduled( 'wewp_crawler_run' ) ) {
             wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'hourly', 'wewp_crawler_run' );
         }
         if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -16,6 +17,9 @@ class Crawler {
     }
 
     public function run() {
+        if ( ! Options::get( 'crawler_enabled', false ) ) {
+            return;
+        }
         $urls = $this->discover_urls();
         foreach ( $urls as $url ) {
             wp_remote_get( $url, array( 'timeout' => 5, 'blocking' => false ) );
@@ -29,9 +33,7 @@ class Crawler {
 
     protected function discover_urls() {
         $urls = array();
-        // Include homepage
         $urls[] = home_url( '/' );
-        // From sitemap if available
         $sitemap = home_url( '/sitemap.xml' );
         $resp = wp_remote_get( $sitemap, array( 'timeout' => 5 ) );
         if ( ! is_wp_error( $resp ) && 200 === wp_remote_retrieve_response_code( $resp ) ) {

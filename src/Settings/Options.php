@@ -16,6 +16,7 @@ class Options {
             'async_js'         => true,
             'defer_js'         => true,
             'delay_js'         => false,
+            'delay_js_list'    => '',
             'css_async'        => false,
             'http2_push'       => false,
             'lazy_images'      => true,

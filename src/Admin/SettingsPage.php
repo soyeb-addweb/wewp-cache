@@ -32,6 +32,7 @@ class SettingsPage {
         $this->add_checkbox( 'lazy_iframes', __( 'Lazy Load Iframes', 'wewp' ), 'wewp_section_pagespeed' );
         $this->add_checkbox( 'remove_unused_css', __( 'Remove Unused CSS', 'wewp' ), 'wewp_section_pagespeed' );
         $this->add_checkbox( 'delay_js', __( 'Delay JS Execution until user interaction', 'wewp' ), 'wewp_section_pagespeed' );
+        add_settings_field( 'delay_js_list', __( 'Delay JS List (one per line: substring or filename)', 'wewp' ), array( $this, 'field_delay_js_list' ), 'wewp-settings', 'wewp_section_pagespeed' );
         $this->add_checkbox( 'css_async', __( 'CSS Asynchronous (non-blocking CSS)', 'wewp' ), 'wewp_section_pagespeed' );
         add_settings_field( 'critical_css', __( 'Critical CSS', 'wewp' ), array( $this, 'field_critical_css' ), 'wewp-settings', 'wewp_section_pagespeed' );
         add_settings_field( 'dns_prefetch_list', __( 'DNS Prefetch (one per line)', 'wewp' ), array( $this, 'field_dns_prefetch' ), 'wewp-settings', 'wewp_section_pagespeed' );
@@ -61,6 +62,12 @@ class SettingsPage {
         $key   = $args['key'];
         $value = Options::get( $key, false );
         echo '<label><input type="checkbox" name="' . esc_attr( Options::OPTION_NAME ) . '[' . esc_attr( $key ) . ']" value="1"' . checked( ! empty( $value ), true, false ) . '> ' . esc_html__( 'Enable', 'wewp' ) . '</label>';
+    }
+
+    public function field_delay_js_list() {
+        $value = Options::get( 'delay_js_list', '' );
+        echo '<textarea class="large-text code" rows="5" name="' . esc_attr( Options::OPTION_NAME ) . '[delay_js_list]" placeholder="jquery.js\nanalytics\nplayer.js">' . esc_textarea( $value ) . '</textarea>';
+        echo '<p class="description">' . esc_html__( 'Lines are matched against script src. Matching scripts will be delayed until user interaction or 3 seconds.', 'wewp' ) . '</p>';
     }
 
     public function field_cdn_host() {
@@ -94,6 +101,7 @@ class SettingsPage {
         $out['critical_css']      = isset( $input['critical_css'] ) ? wp_strip_all_tags( $input['critical_css'] ) : '';
         $out['dns_prefetch_list'] = isset( $input['dns_prefetch_list'] ) ? sanitize_textarea_field( $input['dns_prefetch_list'] ) : '';
         $out['font_preload_list'] = isset( $input['font_preload_list'] ) ? sanitize_textarea_field( $input['font_preload_list'] ) : '';
+        $out['delay_js_list']     = isset( $input['delay_js_list'] ) ? sanitize_textarea_field( $input['delay_js_list'] ) : '';
         return $out;
     }
 

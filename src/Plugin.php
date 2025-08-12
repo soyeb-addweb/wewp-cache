@@ -15,6 +15,7 @@ use WeWP\Ecommerce\WooCommerceSupport;
 use WeWP\Advanced\Crawler;
 use WeWP\Advanced\DeveloperApi;
 use WeWP\Admin\SettingsPage;
+use WeWP\Admin\DocsPage;
 use WeWP\Settings\Options;
 
 class Plugin {
@@ -60,6 +61,7 @@ class Plugin {
 
 		// Admin settings page
 		( new SettingsPage() )->init();
+		( new DocsPage() )->init();
 
 		// New modules
 		( new HtmlOptimization() )->init();

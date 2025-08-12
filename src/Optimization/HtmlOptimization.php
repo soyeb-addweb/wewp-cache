@@ -109,14 +109,41 @@ class HtmlOptimization {
         return $html;
     }
 
+    protected function get_delay_patterns() {
+        $list = (string) Options::get( 'delay_js_list', '' );
+        $lines = preg_split( '/\r\n|\r|\n/', $list );
+        $patterns = array();
+        foreach ( $lines as $line ) {
+            $t = trim( $line );
+            if ( $t !== '' ) {
+                $patterns[] = $t;
+            }
+        }
+        return $patterns;
+    }
+
     protected function delay_js_execution( $html ) {
-        // Replace <script src=...> with data-delayed attribute and bootstrap a small runner script
-        $html = preg_replace_callback('/<script([^>]*)src=("|\')(.*?)(\2)([^>]*)><\/script>/i', function($matches) {
+        $patterns = $this->get_delay_patterns();
+        $use_whitelist = ! empty( $patterns );
+
+        $html = preg_replace_callback('/<script([^>]*)src=("|\')(.*?)(\2)([^>]*)><\/script>/i', function($matches) use ($patterns, $use_whitelist) {
             $attrs = trim( $matches[1] . ' ' . $matches[5] );
             $src   = $matches[3];
             // Skip inline or json scripts
             if ( stripos( $attrs, ' type="application/ld+json"' ) !== false ) {
                 return $matches[0];
+            }
+            if ( $use_whitelist ) {
+                $matched = false;
+                foreach ( $patterns as $p ) {
+                    if ( stripos( $src, $p ) !== false ) {
+                        $matched = true;
+                        break;
+                    }
+                }
+                if ( ! $matched ) {
+                    return $matches[0];
+                }
             }
             return '<script data-wewp-delay src="' . esc_url( $src ) . '" ' . $attrs . '></script>';
         }, $html );
